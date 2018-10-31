@@ -1,4 +1,4 @@
-package serialize
+package condparse
 
 import (
 	"fmt"
