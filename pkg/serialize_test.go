@@ -14,6 +14,31 @@ type testCase struct {
 	logic    string
 }
 
+func deepEql(assert *assert.Assertions, expected Node, actual Node) {
+	switch e := expected.(type) {
+	case *Leaf:
+		a, isLeaf := actual.(*Leaf)
+		assert.True(isLeaf, "Expected was a leaf, actual was not! expected %v, actual %v", expected, actual)
+		if e != nil && a != nil {
+			assert.Equal(e.Val, a.Val, "Expected leaf values to match")
+		} else if e != nil || a != nil {
+			assert.Fail(fmt.Sprintf("One was nil and the other had a value. Expected %v, Actual %v", e, a))
+		}
+	case *Op:
+		a, isOp := actual.(*Op)
+		assert.True(isOp, "Expected was an Operation, actual was not! expected %v, actual %v", expected, actual)
+		if e != nil && a != nil {
+			assert.Equal(e.Val, a.Val, "Expected operation to be the same")
+			deepEql(assert, e.Left, a.Left)
+			deepEql(assert, e.Right, a.Right)
+		} else if e != nil || a != nil {
+			assert.Fail(fmt.Sprintf("One was nil and the other had a value. Expected %v, Actual %v", e, a))
+		}
+	default:
+		assert.Fail("Node was neither a leaf or an op.")
+	}
+}
+
 var cases []testCase
 
 func init() {
@@ -102,33 +127,8 @@ func init() {
 	}
 }
 
-func deepEql(assert *assert.Assertions, expected Node, actual Node) {
-	switch e := expected.(type) {
-	case *Leaf:
-		a, isLeaf := actual.(*Leaf)
-		assert.True(isLeaf, "Expected was a leaf, actual was not! expected %#v, actual %#v", expected, actual)
-		if e != nil && a != nil {
-			assert.Equal(e.Val, a.Val, "Expected leaf values to match")
-		} else if e != nil || a != nil {
-			assert.Fail(fmt.Sprintf("One was nil and the other had a value. Expected %v, Actual %v", e, a))
-		}
-	case *Op:
-		a, isOp := actual.(*Op)
-		assert.True(isOp, "Expected was an Operation, actual was not! expected %#v, actual %#v", expected, actual)
-		if e != nil && a != nil {
-			assert.Equal(e.Val, a.Val, "Expected operation to be the same")
-			deepEql(assert, e.Left, a.Left)
-			deepEql(assert, e.Right, a.Right)
-		} else if e != nil || a != nil {
-			assert.Fail(fmt.Sprintf("One was nil and the other had a value. Expected %v, Actual %v", e, a))
-		}
-	default:
-		assert.Fail("Node was neither a leaf or an op.")
-	}
-}
-
 func TestParse(t *testing.T) {
-	for _, c := range cases[2:3] {
+	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
 			assert := assert.New(t)
 			actual, err := Parse(c.logic)
