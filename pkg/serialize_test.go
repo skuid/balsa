@@ -1,314 +1,72 @@
 package condparse
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-type testCase struct {
-	desc     string
-	exprTree Node
-	logic    string
-}
-
-func deepEql(assert *assert.Assertions, expected Node, actual Node) {
-	switch e := expected.(type) {
-	case *Leaf:
-		a, isLeaf := actual.(*Leaf)
-		assert.True(isLeaf, "Expected was a leaf, actual was not! expected %v, actual %v", expected, actual)
-		if e != nil && a != nil {
-			assert.Equal(e.Val, a.Val, "Expected leaf values to match")
-		} else if e != nil || a != nil {
-			assert.Fail(fmt.Sprintf("One was nil and the other had a value. Expected %v, Actual %v", e, a))
-		}
-	case *Op:
-		a, isOp := actual.(*Op)
-		assert.True(isOp, "Expected was an Operation, actual was not! expected %v, actual %v", expected, actual)
-		if e != nil && a != nil {
-			assert.Equal(e.Val, a.Val, "Expected operation to be the same")
-			deepEql(assert, e.Left, a.Left)
-			deepEql(assert, e.Right, a.Right)
-		} else if e != nil || a != nil {
-			assert.Fail(fmt.Sprintf("One was nil and the other had a value. Expected %v, Actual %v", e, a))
-		}
-	default:
-		assert.Fail("Node was neither a leaf or an op.")
-	}
-}
-
-var cases []testCase
-
-func init() {
-	cases = []testCase{
-		{
-			"Should serialize a single leaf",
-			&Leaf{1},
-			"1",
-		},
-		{
-			"Should parse a very simple tree with just one operation and two leafs",
-			&Op{
-				Left:  &Leaf{1},
-				Val:   "AND",
-				Right: &Leaf{2},
-			},
-			"1 AND 2",
-		},
-		{
-			"Should parse a more complex tree with left only operations (no parens)",
-			&Op{
-				Left: &Op{
-					Left:  &Leaf{1},
-					Val:   "OR",
-					Right: &Leaf{2},
-				},
-				Val:   "AND",
-				Right: &Leaf{3},
-			},
-			"1 OR 2 AND 3",
-		},
-		{
-			"Should parse a more complex tree with left and right operations, including parens",
-			&Op{
-				Left: &Op{
-					Left:  &Leaf{1},
-					Val:   "OR",
-					Right: &Leaf{2},
-				},
-				Val: "AND",
-				Right: &Op{
-					Left:  &Leaf{3},
-					Val:   "OR",
-					Right: &Leaf{4},
-				},
-			},
-			"1 OR 2 AND (3 OR 4)",
-		},
-		{
-			"Should complex trees with more depth",
-			&Op{
-				Left: &Op{
-					Left: &Leaf{1},
-					Val:  "OR",
-					Right: &Op{
-						Left: &Leaf{5},
-						Val:  "AND",
-						Right: &Op{
-							Left:  &Leaf{7},
-							Val:   "OR",
-							Right: &Leaf{8},
-						},
-					},
-				},
-				Val: "AND",
-				Right: &Op{
-					Left: &Op{
-						Left: &Op{
-							Left:  &Leaf{3},
-							Val:   "AND",
-							Right: &Leaf{2},
-						},
-						Val: "OR",
-						Right: &Op{
-							Left:  &Leaf{56},
-							Val:   "AND",
-							Right: &Leaf{1000},
-						},
-					},
-					Val:   "OR",
-					Right: &Leaf{4},
-				},
-			},
-			"1 OR (5 AND (7 OR 8)) AND (3 AND 2 OR (56 AND 1000) OR 4)",
-		},
-	}
-}
-
-func TestParse(t *testing.T) {
-	for _, c := range cases {
-		t.Run(c.desc, func(t *testing.T) {
-			assert := assert.New(t)
-			actual, err := Parse(c.logic)
-
-			assert.NoError(err, "Should not have an error")
-			deepEql(assert, c.exprTree, actual)
-		})
-	}
-}
-
-func TestSerialize(t *testing.T) {
-	for _, c := range cases {
-		t.Run(c.desc, func(t *testing.T) {
-			assert := assert.New(t)
-			var b strings.Builder
-			c.exprTree.Eval(&b)
-
-			actual := b.String()
-			assert.Equal(c.logic, actual)
-		})
-	}
-}
-
-func TestRemove(t *testing.T) {
+func TestSerializeErrors(t *testing.T) {
 	cases := []struct {
-		desc     string
-		fixture  Node
-		remove   []uint
-		expected string
+		desc    string
+		fixture Node
+		err     *SerializeError
 	}{
 		{
-			"Should not remove anything if not found",
-			&Leaf{1},
-			[]uint{3},
-			"1",
-		},
-		{
-			"Should remove a single leaf",
-			&Leaf{1},
-			[]uint{1},
-			"",
-		},
-		{
-			"Should parse a very simple tree with just one operation and two leafs",
+			"Should return an exception if the operation has a nil left",
 			&Op{
-				Left:  &Leaf{1},
-				Val:   "AND",
-				Right: &Leaf{2},
-			},
-			[]uint{2},
-			"1",
-		},
-		{
-			"Should parse a more complex tree with left only operations (no parens)",
-			&Op{
-				Left: &Op{
-					Left:  &Leaf{1},
-					Val:   "OR",
-					Right: &Leaf{2},
-				},
 				Val:   "AND",
 				Right: &Leaf{3},
 			},
-			[]uint{2},
-			"1 AND 3",
+			&SerializeError{
+				Op:     "AND",
+				Reason: "nil left node",
+			},
 		},
 		{
-			"Should parse a more complex tree with left and right operations, including parens",
+			"Should return an exception if the operation has a nil right",
 			&Op{
-				Left: &Op{
-					Left:  &Leaf{1},
-					Val:   "OR",
-					Right: &Leaf{2},
-				},
-				Val: "AND",
-				Right: &Op{
-					Left:  &Leaf{3},
-					Val:   "OR",
-					Right: &Leaf{4},
-				},
+				Val:  "AND",
+				Left: &Leaf{3},
 			},
-			[]uint{3},
-			"1 OR 2 AND 4",
+			&SerializeError{
+				Op:     "AND",
+				Reason: "nil right node",
+			},
 		},
 		{
-			"Should complex trees with more depth",
+			"Should return an exception if the operation doesn't have a value",
 			&Op{
-				Left: &Op{
-					Left: &Leaf{1},
-					Val:  "OR",
-					Right: &Op{
-						Left: &Leaf{5},
-						Val:  "AND",
-						Right: &Op{
-							Left:  &Leaf{7},
-							Val:   "OR",
-							Right: &Leaf{8},
-						},
-					},
-				},
-				Val: "AND",
-				Right: &Op{
-					Left: &Op{
-						Left: &Op{
-							Left:  &Leaf{3},
-							Val:   "AND",
-							Right: &Leaf{2},
-						},
-						Val: "OR",
-						Right: &Op{
-							Left:  &Leaf{56},
-							Val:   "AND",
-							Right: &Leaf{1000},
-						},
-					},
-					Val:   "OR",
-					Right: &Leaf{4},
-				},
+				Left:  &Leaf{3},
+				Val:   "",
+				Right: &Leaf{3},
 			},
-			[]uint{7, 56},
-			"1 OR (5 AND 8) AND (3 AND 2 OR 1000 OR 4)",
+			&SerializeError{
+				Op:     "",
+				Reason: "bad operation",
+			},
 		},
 		{
-			"Should remove the value from multiple places",
+			"Should return an exception if the operation doesn't have an acceptable value",
 			&Op{
-				Left: &Op{
-					Left: &Leaf{1},
-					Val:  "OR",
-					Right: &Op{
-						Left: &Leaf{5},
-						Val:  "AND",
-						Right: &Op{
-							Left:  &Leaf{1},
-							Val:   "OR",
-							Right: &Leaf{8},
-						},
-					},
-				},
-				Val: "AND",
-				Right: &Op{
-					Left: &Op{
-						Left: &Op{
-							Left:  &Leaf{1},
-							Val:   "AND",
-							Right: &Leaf{2},
-						},
-						Val: "OR",
-						Right: &Op{
-							Left:  &Leaf{56},
-							Val:   "AND",
-							Right: &Leaf{1},
-						},
-					},
-					Val:   "OR",
-					Right: &Leaf{4},
-				},
+				Left:  &Leaf{3},
+				Val:   "FOO",
+				Right: &Leaf{3},
 			},
-			[]uint{1},
-			"5 AND 8 AND (2 OR 56 OR 4)",
+			&SerializeError{
+				Op:     "FOO",
+				Reason: "bad operation",
+			},
 		},
 	}
 
-	for _, c := range cases[len(cases)-1:] {
+	for _, c := range cases {
 		t.Run(c.desc, func(t *testing.T) {
 			assert := assert.New(t)
-
-			n := c.fixture
-
-			for _, v := range c.remove {
-				n = n.Remove(v)
-			}
-
 			var b strings.Builder
-			if n != nil {
-				n.Eval(&b)
-				actual := b.String()
-				assert.Equal(c.expected, actual)
-			} else {
-				assert.Equal(c.expected, "")
-			}
+			err := c.fixture.Eval(&b)
+			assert.Equal(c.err, err)
 		})
 	}
 }
