@@ -3,7 +3,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/skuid/condparse/pkg/version"
+	"github.com/skuid/balsa/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -13,7 +13,7 @@ var sugar = zap.L().Sugar()
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:     "CondParse",
+	Use:     "Balsa",
 	Short:   "A utility and set of functions to parse condition logic",
 	Version: version.Name,
 }
@@ -39,6 +39,6 @@ func initConfig() {
 		os.Exit(1)
 	}
 
-	viper.SetEnvPrefix("condparse")
+	viper.SetEnvPrefix("balsa")
 	viper.AutomaticEnv()
 }

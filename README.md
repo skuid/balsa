@@ -1,4 +1,4 @@
-# condparse
+# balsa
 
 This is mostly intended to be used as a library for parsing, manipulating, and serializing a condition logic string.
 
@@ -12,12 +12,12 @@ To parse an existing condition logic string, call `Parse(string) error`
 
 ```go
 import {
-	"github.com/skuid/condparse/condparse"
+	"github.com/skuid/balsa/parse"
 }
 
 logic := "1 OR 2 AND (3 OR 4)"
 
-tree, err := condparse.Parse(logic)
+tree, err := parse.Parse(logic)
 
 if err != nil {
 	fmt.Print("Error: %v", err)
@@ -49,7 +49,7 @@ This can be called multiple times to remove leafs from the tree by value. It wil
 ```go
 logic := "1 OR (5 AND (1 OR 1)) AND (1 AND 2 OR (56 AND 1)) OR 4"
 
-tree, _ := condparse.Parse(logic)
+tree, _ := parse.Parse(logic)
 
 n := tree.Remove(1)
 n = tree.Remove(8)

@@ -1,4 +1,4 @@
-package condparse
+package parse
 
 // Remove a node by value
 //	n.Remove(1)

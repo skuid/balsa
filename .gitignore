@@ -13,7 +13,7 @@ redis
 coverage.out
 
 # Build artifacts
-condparse
+balsa
 
 # build/test files
 env.sh
