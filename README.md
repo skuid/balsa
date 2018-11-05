@@ -12,7 +12,7 @@ To parse an existing condition logic string, call `Parse(string) error`
 
 ```go
 import {
-	"github.com/skuid/condparse"
+	"github.com/skuid/condparse/condparse"
 }
 
 logic := "1 OR 2 AND (3 OR 4)"
