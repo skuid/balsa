@@ -47,7 +47,7 @@ fmt.Printf("Serialized the tree into condition logic: %s", b.String())
 This can be called multiple times to remove leafs from the tree by value. It will hoist any remaining expressions where needed and ignore any leafs it does not contain.
 
 ```go
-logic := "1 OR (5 AND (1 OR 1)) AND (1 AND 2 OR (56 AND 1) OR 4"
+logic := "1 OR (5 AND (1 OR 1)) AND (1 AND 2 OR (56 AND 1)) OR 4"
 
 tree, _ := condparse.Parse(logic)
 
