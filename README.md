@@ -51,7 +51,12 @@ logic := "1 OR (5 AND (1 OR 1)) AND (1 AND 2 OR (56 AND 1)) OR 4"
 
 tree, _ := condparse.Parse(logic)
 
-tree.Remove(1)
+n := tree.Remove(1)
+n = tree.Remove(8)
+
+var b strings.Builder
+n.Eval(&b)
+fmt.Println(b.String())
 tree.Remove(8)
 
 var b strings.Builder
