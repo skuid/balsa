@@ -1,19 +1,11 @@
-package serialize
+package condparse
 
 import (
 	"fmt"
 	"io"
 )
 
-type Node interface {
-	Remove(uint) Node
-	Eval(io.Writer) error
-}
-
-type Leaf struct {
-	Val uint
-}
-
+// Eval will print the leaf's value to a writer
 func (l *Leaf) Eval(w io.Writer) error {
 	if _, err := fmt.Fprintf(w, "%d", l.Val); err != nil {
 		return err
@@ -21,13 +13,29 @@ func (l *Leaf) Eval(w io.Writer) error {
 	return nil
 }
 
-type Op struct {
-	Left  Node
-	Val   string
-	Right Node
-}
-
+// Eval will print the left node, the operation, and then the right node to a writer
 func (o *Op) Eval(w io.Writer) error {
+	if o.Left == nil {
+		return &SerializeError{
+			Op:     o.Val,
+			Reason: "nil left node",
+		}
+	}
+
+	if o.Right == nil {
+		return &SerializeError{
+			Op:     o.Val,
+			Reason: "nil right node",
+		}
+	}
+
+	if !(o.Val == "AND" || o.Val == "OR") {
+		return &SerializeError{
+			Op:     o.Val,
+			Reason: "bad operation",
+		}
+	}
+
 	if err := o.Left.Eval(w); err != nil {
 		return err
 	}
@@ -53,33 +61,12 @@ func (o *Op) Eval(w io.Writer) error {
 	return nil
 }
 
-func (l *Leaf) Remove(v uint) Node {
-	if l.Val == v {
-		return nil
-	}
-	return l
+// SerializeError holds information about syntactic errors when trying to eval
+type SerializeError struct {
+	Op     string
+	Reason string
 }
 
-func (o *Op) Remove(v uint) Node {
-
-	l := o.Left.Remove(v)
-	r := o.Right.Remove(v)
-
-	if l == nil && r == nil {
-		return nil
-	}
-
-	if l == nil {
-		return r
-	}
-
-	if r == nil {
-		return l
-	}
-
-	return &Op{
-		Left:  l,
-		Val:   o.Val,
-		Right: r,
-	}
+func (e *SerializeError) Error() string {
+	return fmt.Sprintf("Could not serialize operation '%s'. Reason: %s", e.Op, e.Reason)
 }
