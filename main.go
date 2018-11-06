@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/skuid/condparse/cmd"
+	"github.com/skuid/balsa/cmd"
 )
 
 func main() {
