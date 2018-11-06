@@ -85,17 +85,22 @@ fmt.Println(b.String())
 
 ## Node.Index
 
-This will re-index all of the leaves starting from the new starting index. If you have a tree that is `5 AND 3` and you want to start the indexing at 9, it will yield `10 AND 9`. This is typically used after the tree is sequenced.
+This will re-index all of the leaves starting from the new starting index. If you have a tree that is `5 AND 3` and you want to start the indexing at 9, it will yield `14 AND 12`. This is typically used after the tree is sequenced.
 
 ```go
 logic := "5 AND 3"
 
 tree, _ := parse.Parse(logic)
 
+var b strings.Builder
 tree = parse.Sequence(tree)
+
+tree.Eval(&b)
+fmt.Println(b.String())
+// 14 AND 12
+
 tree = tree.Index(9)
 
-var b strings.Builder
 tree.Eval(&b)
 fmt.Println(b.String())
 // 10 AND 9 
