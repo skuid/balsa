@@ -65,6 +65,42 @@ fmt.Println(b.String())
 // 5 AND (2 OR 56 OR 4)
 ```
 
+## Sequence
+
+This will take a node and re-sequence all of the leaves based on ordinal positioning, starting at 0. For example, if you have a tree that is `5 AND 3`, this will re-sequence it as `1 AND 0`.
+
+```go
+logic := "5 AND 3"
+
+tree, _ := parse.Parse(logic)
+
+tree = parse.Sequence(tree)
+
+var b strings.Builder
+tree.Eval(&b)
+fmt.Println(b.String())
+
+// 2 AND 1
+```
+
+## Node.Index
+
+This will re-index all of the leaves starting from the new starting index. If you have a tree that is `5 AND 3` and you want to start the indexing at 9, it will yield `10 AND 9`. This is typically used after the tree is sequenced.
+
+```go
+logic := "5 AND 3"
+
+tree, _ := parse.Parse(logic)
+
+tree = parse.Sequence(tree)
+tree = tree.Index(9)
+
+var b strings.Builder
+tree.Eval(&b)
+fmt.Println(b.String())
+// 10 AND 9 
+```
+
 # Errors
 
 `Parse` will throw `ParseError` errors mostly. These errors contain:

@@ -18,6 +18,14 @@
   version = "v1.4.7"
 
 [[projects]]
+  branch = "release-branch.go1.3"
+  digest = "1:e5e95df618258c97995e40326898774944ea965713da6787a66d9d19f373bf89"
+  name = "github.com/golang/tools"
+  packages = ["container/intsets"]
+  pruneopts = "UT"
+  revision = "b5e7da4a16c82e64159ccf8eda8babcecef44b88"
+
+[[projects]]
   digest = "1:0c6aceca32885ed17808af2ad3a85f2cf18aca1a49b25de4a1d54f03913128c0"
   name = "github.com/hashicorp/hcl"
   packages = [
@@ -201,6 +209,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/golang/tools/container/intsets",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",

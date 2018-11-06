@@ -126,3 +126,120 @@ func TestIndex(t *testing.T) {
 		})
 	}
 }
+
+func TestSequence(t *testing.T) {
+	cases := []struct {
+		desc     string
+		fixture  Node
+		expected Node
+	}{
+		{
+			"Should sequence a single leaf",
+			&Leaf{5},
+			&Leaf{0},
+		},
+		{
+			"Should sequence a simple operation",
+			&Op{
+				Left:  &Leaf{5},
+				Val:   "AND",
+				Right: &Leaf{3},
+			},
+			&Op{
+				Left:  &Leaf{1},
+				Val:   "AND",
+				Right: &Leaf{0},
+			},
+		},
+		{
+			"Should reindex a complex op",
+			&Op{
+				Left: &Op{
+					Left: &Leaf{1},
+					Val:  "OR",
+					Right: &Op{
+						Left: &Leaf{5},
+						Val:  "AND",
+						Right: &Op{
+							Left:  &Leaf{7},
+							Val:   "OR",
+							Right: &Leaf{8},
+						},
+					},
+				},
+				Val: "AND",
+				Right: &Op{
+					Left: &Op{
+						Left: &Op{
+							Left:  &Leaf{3},
+							Val:   "AND",
+							Right: &Leaf{2},
+						},
+						Val: "OR",
+						Right: &Op{
+							Left:  &Leaf{56},
+							Val:   "AND",
+							Right: &Leaf{1000},
+						},
+					},
+					Val:   "OR",
+					Right: &Leaf{4},
+				},
+			},
+			&Op{
+				Left: &Op{
+					Left: &Leaf{0},
+					Val:  "OR",
+					Right: &Op{
+						Left: &Leaf{4},
+						Val:  "AND",
+						Right: &Op{
+							Left:  &Leaf{5},
+							Val:   "OR",
+							Right: &Leaf{6},
+						},
+					},
+				},
+				Val: "AND",
+				Right: &Op{
+					Left: &Op{
+						Left: &Op{
+							Left:  &Leaf{2},
+							Val:   "AND",
+							Right: &Leaf{1},
+						},
+						Val: "OR",
+						Right: &Op{
+							Left:  &Leaf{7},
+							Val:   "AND",
+							Right: &Leaf{8},
+						},
+					},
+					Val:   "OR",
+					Right: &Leaf{3},
+				},
+			},
+		},
+		{
+			"Should handle nil leafs",
+			&Op{
+				Left: &Leaf{3},
+				Val:  "OR",
+			},
+			&Op{
+				Left: &Leaf{0},
+				Val:  "OR",
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.desc, func(t *testing.T) {
+			assert := assert.New(t)
+
+			actual := Sequence(c.fixture)
+
+			deepEql(assert, c.expected, actual)
+		})
+	}
+}
