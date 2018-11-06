@@ -128,6 +128,9 @@ func TestSerialize(t *testing.T) {
 }
 
 func deepEql(assert *assert.Assertions, expected Node, actual Node) {
+	if expected == nil && actual == nil {
+		return
+	}
 	switch e := expected.(type) {
 	case *Leaf:
 		a, isLeaf := actual.(*Leaf)
@@ -148,6 +151,6 @@ func deepEql(assert *assert.Assertions, expected Node, actual Node) {
 			assert.Fail(fmt.Sprintf("One was nil and the other had a value. Expected %v, Actual %v", e, a))
 		}
 	default:
-		assert.Fail("Node was neither a leaf or an op.")
+		assert.Fail(fmt.Sprintf("Node was neither a leaf or an op but was instead %#v", e))
 	}
 }
