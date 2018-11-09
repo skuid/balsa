@@ -97,6 +97,15 @@ func Parse(logic string) (Node, error) {
 			Reason:   "unbalanced parenthesis",
 		}
 	}
+
+	if p.kind == OP {
+		return nil, &ParseError{
+			Position: len(logic) - p.buffer.Len(),
+			Logic:    logic,
+			Reason:   "unexpected operation",
+		}
+	}
+
 	if err := p.eval(len(logic)); err != nil {
 		if perr, ok := err.(*ParseError); ok {
 			perr.Logic = logic

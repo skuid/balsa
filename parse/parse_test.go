@@ -22,6 +22,15 @@ func TestParseErrors(t *testing.T) {
 			},
 		},
 		{
+			"Should fail with a missing leaf after last operation",
+			"1 AND",
+			&ParseError{
+				Position: 2,
+				Logic:    "1 AND",
+				Reason:   "unexpected operation",
+			},
+		},
+		{
 			"Should fail with an unacceptable operation",
 			"1 FOO 3",
 			&ParseError{
