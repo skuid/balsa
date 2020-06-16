@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"github.com/golang/tools/container/intsets"
+	"golang.org/x/tools/container/intsets"
 )
 
 // Index Op will index the left and right nodes
