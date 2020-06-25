@@ -4,6 +4,8 @@ This is mostly intended to be used as a library for parsing, manipulating, and s
 
 For example, given a condition logic string like so `1 OR 2 AND (3 AND 4)`, this will allow you to remove any leaves by value and still get a valid condition logic string.
 
+[![ci status](https://github.com/skuid/balsa/workflows/ci/badge.svg)](https://github.com/skuid/balsa/actions)
+
 # Usage
 
 ## Parse
