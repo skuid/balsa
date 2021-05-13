@@ -10,7 +10,7 @@ func TestIndex(t *testing.T) {
 	cases := []struct {
 		desc     string
 		fixture  Node
-		start    uint
+		start    int
 		expected Node
 	}{
 		{
