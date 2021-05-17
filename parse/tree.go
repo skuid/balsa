@@ -9,7 +9,7 @@ import (
 type Node interface {
 	Remove(uint) Node
 	Eval(io.Writer) error
-	Index(uint) Node
+	Index(int) Node
 }
 
 // Leaf is a concrete Node that will hold a single value

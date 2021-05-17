@@ -5,7 +5,7 @@ import (
 )
 
 // Index Op will index the left and right nodes
-func (o *Op) Index(start uint) Node {
+func (o *Op) Index(start int) Node {
 
 	var left Node
 	var right Node
@@ -26,9 +26,9 @@ func (o *Op) Index(start uint) Node {
 }
 
 // Index Leaf will add start to the current value
-func (l *Leaf) Index(start uint) Node {
+func (l *Leaf) Index(start int) Node {
 	return &Leaf{
-		Val: l.Val + start,
+		Val: uint(int(l.Val) + start),
 	}
 }
 
